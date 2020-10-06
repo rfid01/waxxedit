@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title>waxxedit</title>
+		<style>
+		body{
+			font-size:14px;
+			margin:0px;
+			padding:0px;			
+		}
+			#edit_id{
+				width:520px;
+				border:10px solid #f5f5f5;
+			}
+		</style>
+	</head>
+	<body>
+	<div id="edit_id">
+		<div id="waxxedit_"></div>	
+	</div>
+	<div><input type="button" name="" value="发表内容" id="button" /></div>
+	</body>
+	<script src="./waxxedit.js"></script>
+	<script>
+		waxxedit.editor.init("waxxedit_","textareaId","520px","350px");
+		document.getElementById("button").addEventListener("click",function(){
+			if(document.getElementById("textareaId").value == null || document.getElementById("textareaId").value ==""){
+				alert('内容不能为空！');
+			}else{
+				alert(document.getElementById("textareaId").value);
+			}
+		})		
+	</script>
+</html>
