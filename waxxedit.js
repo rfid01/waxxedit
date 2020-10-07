@@ -67,13 +67,13 @@ waxxedit.editor = {
 		this.configuration(editor_id,textareaId,width,height,color);
 		this.container();
 		this.toolbar();
-		this.content();		
+		this.content();	
+		wedit.uMethods.winResize();
 	},
 	
 	//画一个编辑器画布
 	container:function(){
-		wedit.contentObj = this.uMethods.getEleById(wedit.configs.editor_id);
-		
+		wedit.contentObj = this.uMethods.getEleById(wedit.configs.editor_id);		
 		wedit.contentObj.style.position = wedit.configs.position;
 		wedit.contentObj.style.width = wedit.configs.width;
 		wedit.contentObj.style.height = wedit.configs.height;
@@ -106,9 +106,9 @@ waxxedit.editor = {
 		},
 		setToolBarMenuStyle:function(ulObj){
 			ulObj.style.cssText="list-style-type:none;margin:0px;padding:0px;";			
-		},		
+		},
 		setCodeFrameworkStyle:function(obj){
-			obj.style.cssText ="position:absolute;top:15%;left:30%;background:#fff;border:1px solid #ccc;border-radius:12px;width:650px;height:350px;z-Index:991;";
+			obj.style.cssText ="position:fixed;top:20%;left:30%;background:#fff;border:1px solid #ccc;border-radius:12px;width:650px;height:350px;z-Index:991;";
 			obj.childNodes[0].style.cssText="height:35px;line-height:35px;font-size:14px;background:#f5f5f5;padding-left:15px;font-weight:bold;";
 			obj.childNodes[0].innerHTML ="<span>插入代码块</span>";
 			obj.childNodes[1].style.cssText ="position:absolute;right:10px;top:10px;border:1px solid #333;width:20px;height:20px;line-height:20px;text-align:center;font-size:16px;cursor:pointer;"		
@@ -132,6 +132,9 @@ waxxedit.editor = {
 		setTextareaStyle:function(obj){
 			obj.style.width = wedit.configs.textareaW;
 			obj.style.height = wedit.configs.textareaH;
+			obj.style.wordWrap ="break-word";
+			obj.style.padding ="10px";
+			obj.style.overflow ="scroll";
 		},
 		createTbarButton:function(ele,type){
 			return wedit.uMethods.createEle(ele,type)
@@ -140,7 +143,7 @@ waxxedit.editor = {
 			var insertObj = wedit.uMethods.getEleById(id);
 			insertObj.addEventListener("click",function(){
 				wedit.textareaObj = wedit.uMethods.getEleById(wedit.configs.textareaId);
-				wedit.textareaObj.value +="\r\n<pre>"+ wedit.uMethods.getEleById(tid).value+"</pre>\r\n";
+				wedit.textareaObj.innerHTML += "\r\n&lt;pre&gt;&lt;code&gt;"+ wedit.toolMethods.textareaStrChageCode(wedit.uMethods.getEleById(tid).value)+"&lt;/code&gt;&lt;/pre&gt;\r\n";
 				//关闭插入代码块
 				wedit.toolMethods.closeCodeDailog(sid,dvid);
 				//关闭弹窗						
@@ -162,7 +165,7 @@ waxxedit.editor = {
 		},
 		//创CODE代码框
 		createCodeFramework:function(){
-			wedit.uMethods.getEleById("code").onclick=function(){
+			wedit.uMethods.getEleById("code").onclick=function(){				
 				//加载遮罩层
 				wedit.uMethods.createShadeDv();
 				//创建弹窗 title, content, button , DIV
@@ -193,7 +196,14 @@ waxxedit.editor = {
 				//加载关闭弹窗事件
 				wedit.toolMethods.closeCodeDailog(wedit.configs.codeCloseSpanId,wedit.configs.codeFrameId);
 				wedit.toolMethods.insetIntoCode("codeButton","codeContent","codeCloseSpan","codeFrame");
+				wedit.uMethods.autoLoadWinWidth();
 			};
+		},
+		//code 字符串处理；
+		textareaStrChageCode:function(str){
+			let st = str.replace(/</g,"&lt;");
+			    st = st.replace(/>/g,"&gt;");
+			return st;
 		},
 		getSelectContextChange:function(obj){
 			for(var j in wedit.tbarMenu){
@@ -202,20 +212,23 @@ waxxedit.editor = {
 		},
 		getSelConChange:function(j){
 			wedit.uMethods.getEleById(j).addEventListener("click",function(){
-				wedit.uMethods.getEleById("")
+				//wedit.uMethods.getEleById("")
 			},false);
-		},		
+		},
 	},
 	
 	//编辑器内容框
 	content:function(){
 		wedit.conTextObj = this.uMethods.createEle("div");
 		wedit.contentObj.appendChild(this.toolClass.setTooBgColor(wedit.conTextObj,wedit.configs.conTextW,wedit.configs.conTextH,wedit.configs.conTextBorder,wedit.configs.conTextBgCOlor));
-		wedit.textareaObj = this.uMethods.createEle("textarea",'textarea');
+		//wedit.textareaObj = this.uMethods.createEle("textarea",'textarea');
+		wedit.textareaObj = this.uMethods.createEle("div");
 		wedit.textareaObj.setAttribute("id",wedit.configs.textareaId);
+		wedit.textareaObj.setAttribute("name","content");
+		wedit.textareaObj.setAttribute("contenteditable","true");
 		this.toolMethods.setTextareaStyle(wedit.textareaObj);
 		wedit.conTextObj.appendChild(wedit.textareaObj);
-		wedit.contentMethods.textareaOnSelectEvent(wedit.configs.textareaId);
+		wedit.contentMethods.textareaOnSelectEvent(wedit.configs.textareaId);		
 	},
 	//对编辑器内容的操作
 	contentClass:{
@@ -277,7 +290,7 @@ waxxedit.editor = {
 		setShadeDvStyle:function(obj){
 			obj.style.margin =0;
 			obj.style.padding = 0;
-			obj.style.position = "absolute";
+			obj.style.position = "fixed";
 			obj.style.top = 0;
 			obj.style.buttom = 0;
 			obj.style.width = "100%";
@@ -285,6 +298,23 @@ waxxedit.editor = {
 			obj.style.opacity ="0.2";
 			obj.style.backgroundColor ="#333";
 			obj.style.zIndex = 990;			
+		},
+		autoLoadWinWidth:function(){
+			if(window.screen.width <=760){					
+				var shadeDvObj = wedit.uMethods.getEleById(wedit.configs.codeFrameId);
+				shadeDvObj.style.cssText="position:fixed;top:20%;left:2%;width:96%;height:350px;background:#ffffff;border:1px solid #ccc;border-radius:12px;z-Index:991;";
+			}
+		},
+		winResize:function(){
+			window.onresize=function(e){
+				if(window.screen.width <=760){					
+					var shadeDvObj = wedit.uMethods.getEleById(wedit.configs.codeFrameId);
+					shadeDvObj.style.cssText="position:fixed;top:20%;left:2%;width:96%;height:350px;background:#ffffff;border:1px solid #ccc;border-radius:12px;z-Index:991;";
+				}else{
+					var shadeDvObj = wedit.uMethods.getEleById(wedit.configs.codeFrameId);
+					shadeDvObj.style.cssText="position:fixed;top:20%;left:30%;background:#fff;border:1px solid #ccc;border-radius:12px;width:650px;height:350px;z-Index:991;";
+				}			
+			}
 		}
 	}
 }
